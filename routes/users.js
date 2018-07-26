@@ -2,9 +2,9 @@ var express = require('express');
 var router = express.Router();
 const sqlite = require('sqlite3').verbose();
 var models = require('../models');
-const auth = require('../config/auth');
+const auth = require("../config/auth");
 const bcrypt = require("bcryptjs");
-
+const passport = require('passport');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -14,6 +14,7 @@ router.get('/', function(req, res, next) {
 router.get("/signup", function (req, res, next) {
   res.render('signup')
 });
+
 
 router.post('/signup', function(req, res, next) {
   const hashedPassword = auth.hashPassword(req.body.password);
@@ -52,7 +53,6 @@ router.post('/signup', function(req, res, next) {
     });
 });
 
-
 router.get('/login', function (req, res, next) {
   res.render('login');
 });
@@ -88,6 +88,25 @@ router.post('/login', function (req, res, next) {
   });
 });
 
+//github login via passport 
+router.get('/login/github', passport.authenticate('github', {
+  session: true,
+  failureRedirect: "/users/login"
+}));
+
+router.get(
+  '/login/github/callback',
+  passport.authenticate('github', {
+    failureRedirect: '/users/login'
+  }),
+  function (req, res) {
+    const token = auth.signUser(req.user);
+    res.cookie('jwt', token);
+    res.redirect('/users/profile/' + req.user.UserId)
+  }
+);
+
+
 router.get('/profile/:id', auth.verifyUser, function (req, res, next) {
   if (req.params.id !== String(req.user.UserId)) {
     res.send('This is not your profile')
@@ -102,6 +121,10 @@ router.get('/profile/:id', auth.verifyUser, function (req, res, next) {
   }
 
 });
+
+
+
+
 
 router.get('/logout', function (req, res) {
 res.cookie('jwt', null);
