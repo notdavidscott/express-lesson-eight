@@ -111,12 +111,20 @@ router.get('/profile/:id', auth.verifyUser, function (req, res, next) {
   if (req.params.id !== String(req.user.UserId)) {
     res.send('This is not your profile')
   } else {
+    //checking the status of admin via status variable 
+    let status; 
+    if (req.user.Admin) {
+      status = 'Admin';
+    } else {
+      status = "Normal User";
+    }
     res.render('profile', {
       FirstName: req.user.FirstName,
       LastName: req.user.LastName,
       Email: req.user.Email,
       UserId: req.user.UserId,
-      Username: req.user.Username
+      Username: req.user.Username,
+      Status: status
     });
   }
 

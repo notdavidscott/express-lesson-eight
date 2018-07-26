@@ -7,7 +7,8 @@ module.exports = {
     const token = jwt.sign(
       {
         Username: user.Username,
-        UserId: user.UserId
+        UserId: user.UserId,
+        Admin: user.Admin
       },
       'secret',
       {
@@ -25,11 +26,12 @@ module.exports = {
       models.users
         .findOne({
           where: {
-            UserId: decoded.UserId
+            UserId: decoded.UserId,
+            Admin: decoded.Admin
           }
         })
         .then(user => {
-          console.log(user.UserId);
+          console.log('User Id: ' + user.UserId + '. Admin Access: ' + user.Admin);
           req.user = user;
           next();
         });
